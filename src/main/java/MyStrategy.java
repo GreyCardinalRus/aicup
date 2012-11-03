@@ -3,7 +3,7 @@ import model.*;
 import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
-	static boolean IsDebug = true;
+	static boolean IsDebug = false;
 	int numStrategy = 0;
 	long tid = 0;
 	Tank EnemyTank = null;
@@ -98,11 +98,10 @@ public final class MyStrategy implements Strategy {
 
 			if (minAngle < (20 / dist) && minAngle > (-20 / dist)
 					&& (self.getRemainingReloadingTime() == 0))
-				
 				if (200 < dist)
-					if(mayFire(self, world,move,EnemyTank)) move.setFireType(FireType.REGULAR);
+					move.setFireType(FireType.REGULAR);
 				else
-					if(mayFire(self, world,move,EnemyTank)) move.setFireType(FireType.PREMIUM_PREFERRED);
+					move.setFireType(FireType.PREMIUM_PREFERRED);
 			else
 				move.setTurretTurn(minAngle);
 		} else {
@@ -118,12 +117,11 @@ public final class MyStrategy implements Strategy {
 						&& tanks[i].getHullDurability() > 0 // live!!!
 						&& Math.abs(self.getTurretAngleTo(tanks[i])) < 0.1
 						&& self.getDistanceTo(tanks[i])<200) {
-					EnemyTank = tanks[i];
 					double dist = self.getDistanceTo(tanks[i]);
 					if (100 < dist)
-						if(mayFire(self, world,move,tanks[i])) move.setFireType(FireType.REGULAR);
+						move.setFireType(FireType.REGULAR);
 					else
-						if(mayFire(self, world,move,tanks[i])) move.setFireType(FireType.PREMIUM_PREFERRED);
+						move.setFireType(FireType.PREMIUM_PREFERRED);
 				}
 
 		}
@@ -168,11 +166,11 @@ public final class MyStrategy implements Strategy {
 //								+ " world.getHeight()=" + world.getHeight());
 				}
 			} else if (moveAngel > 0.5) {
-				move.setLeftTrackPower(0*1 * self.getEngineRearPowerFactor());
+				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
 			} else if (moveAngel < -0.5) {
 				move.setLeftTrackPower(-1);
-				move.setRightTrackPower(0*1 * self.getEngineRearPowerFactor());
+				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else // forward if (moveAngel > -0.5)
 			{
 //				if (((self.getAngle() > -2.0 && self.getAngle() < -1.0)
@@ -211,33 +209,7 @@ public final class MyStrategy implements Strategy {
 		return TankType.MEDIUM;
 	}
 
-	boolean mayFire(Tank self, World world, Move move,Unit target ) {
-//		Tank[] tanks = world.getTanks();
-//		Bonus[] bonuses = world.getBonuses();
-//		Shell[] shells = world.getShells();
-//		int i;
-//		double minAngle = self.getTurretAngleTo(EnemyTank);
-//		move.setTurretTurn(minAngle);
-//		double dist = self.getDistanceTo(EnemyTank);
-//		
-//		for (i = 0; i < bonuses.length; i++) {
-//			if((Math.abs(minAngle-self.getTurretAngleTo(bonuses[i]))<0.1)
-//					&& dist < self.getDistanceTo(bonuses[i])) return false;
-//		}
-//		for (i = 0; i < shells.length; i++) {
-//			if((Math.abs(minAngle-self.getTurretAngleTo(shells[i]))<0.1)
-//					&& dist < self.getDistanceTo(shells[i])) return false;
-//		}
-//		for (i = 0; i < tanks.length; i++) {
-//			if((Math.abs(minAngle-self.getTurretAngleTo(tanks[i]))<0.1)
-//					&& dist < self.getDistanceTo(tanks[i])
-//					&& (tanks[i].isTeammate() // Friend!!
-//					|| tanks[i].getCrewHealth() == 0 // Dead!!!
-//					|| tanks[i].getHullDurability() == 0) // Dead!!!
-//					) 
-//					return false;
-//		}
-		return true;
+	void turnBudy(double angle) {
 
 	}
 
