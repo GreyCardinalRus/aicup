@@ -97,7 +97,8 @@ public final class MyStrategy implements Strategy {
 			double dist = self.getDistanceTo(EnemyTank);
 
 			if (minAngle < (20 / dist) && minAngle > (-20 / dist)
-					&& (self.getRemainingReloadingTime() == 0))
+					&& (self.getRemainingReloadingTime() == 0)
+					&& mayFire( self, world,EnemyTank ))
 				if (200 < dist)
 					move.setFireType(FireType.REGULAR);
 				else
@@ -116,12 +117,16 @@ public final class MyStrategy implements Strategy {
 						&& tanks[i].getCrewHealth() > 0 // live!!!
 						&& tanks[i].getHullDurability() > 0 // live!!!
 						&& Math.abs(self.getTurretAngleTo(tanks[i])) < 0.1
-						&& self.getDistanceTo(tanks[i])<200) {
+						&& self.getDistanceTo(tanks[i])<200
+						&& mayFire( self, world,tanks[i] )) {
+					
 					double dist = self.getDistanceTo(tanks[i]);
+					
 					if (100 < dist)
 						move.setFireType(FireType.REGULAR);
 					else
 						move.setFireType(FireType.PREMIUM_PREFERRED);
+					i = tanks.length;
 				}
 
 		}
@@ -209,8 +214,35 @@ public final class MyStrategy implements Strategy {
 		return TankType.MEDIUM;
 	}
 
-	void turnBudy(double angle) {
+	boolean mayFire(Tank self, World world, Tank EnemyTank) {
+		Tank[] tanks = world.getTanks();
+		Bonus[] bonuses = world.getBonuses();
+		Shell[] shells = world.getShells();
+		int i;
+		double minAngle = self.getTurretAngleTo(EnemyTank);
+		//move.setTurretTurn(minAngle);
+		double dist = self.getDistanceTo(EnemyTank);
+		
+		for (i = 0; i < bonuses.length; i++) {
+			if((Math.abs(minAngle-self.getTurretAngleTo(bonuses[i]))<0.1)
+					&& dist < self.getDistanceTo(bonuses[i])) return false;
+		}
+		for (i = 0; i < shells.length; i++) {
+			if((Math.abs(minAngle-self.getTurretAngleTo(shells[i]))<0.1)
+					&& dist < self.getDistanceTo(shells[i])) return false;
+		}
+		for (i = 0; i < tanks.length; i++) {
+			if((Math.abs(minAngle-self.getTurretAngleTo(tanks[i]))<0.1)
+					&& dist < self.getDistanceTo(tanks[i])
+					&& (tanks[i].isTeammate() // Friend!!
+					|| tanks[i].getCrewHealth() == 0 // Dead!!!
+					|| tanks[i].getHullDurability() == 0) // Dead!!!
+					) 
+					return false;
+		}
+		return true;
 
 	}
 
 }
+
