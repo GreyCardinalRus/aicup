@@ -70,27 +70,7 @@ public final class MyStrategy implements Strategy {
 					}
 
 				}
-		// if (MaxRatePlayer == null || MaxRatePlayer.getScore() == 0) {
-		// MaxRatePlayer = null;
-		// for (i = 0; i < tanks.length; i++) {
-		// if (!tanks[i].isTeammate() && tanks[i].getCrewHealth() > 0
-		// && tanks[i].getHullDurability() > 0) {
-		// if (minAngle > self.getTurretAngleTo(tanks[i])) {
-		// tank = tanks[i];
-		// minAngle = self.getTurretAngleTo(tanks[i]);
-		// }
-		// }
-		// }
-		// } else {
-		// // for (i = 0; i < tanks.length; i++) {
-		// // if (tanks[i].getPlayerName().equals(MaxRatePlayer.getName())) {
-		// // tank = tanks[i];
-		// // minAngle = self.getTurretAngleTo(tanks[i]);
-		// // }
-		// // }
-		//
-		// }
-		if (EnemyTank != null) {
+			if (EnemyTank != null) {
 			if (tid != EnemyTank.getId() && EnemyPlayer.getScore() > 0)
 				if(IsDebug) System.out.println("change Target:" + EnemyTank.getId()
 						+ " Player:" + EnemyTank.getPlayerName());
@@ -108,7 +88,7 @@ public final class MyStrategy implements Strategy {
 			move.setTurretTurn(1);
 		}
 
-		if (self.getRemainingReloadingTime() < 5 &&(minAngle > 0.1||minAngle < -0.1)){// Ready to fire
+		if (self.getRemainingReloadingTime() < 10 &&(minAngle > 0.1||minAngle < -0.1)){// Ready to fire
 			if (minAngle > 0.1) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
@@ -116,8 +96,8 @@ public final class MyStrategy implements Strategy {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else {
-				move.setLeftTrackPower(1);
-				move.setRightTrackPower(1);
+				move.setLeftTrackPower(-1);
+				move.setRightTrackPower(-1);
 			}
 		} 
 		else {
@@ -177,8 +157,8 @@ public final class MyStrategy implements Strategy {
 
 	@Override
 	public TankType selectTank(int tankIndex, int teamSize) {
-		 if (1 == teamSize)
-		 return TankType.HEAVY;
+		 //if (1 == teamSize)
+		 //return TankType.HEAVY;
 		return TankType.MEDIUM;
 	}
 
