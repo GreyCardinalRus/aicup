@@ -1,6 +1,6 @@
 import model.*;
 
-import static java.lang.StrictMath.PI;
+//import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
 	static boolean IsDebug = false;
@@ -58,13 +58,13 @@ public final class MyStrategy implements Strategy {
 		}
 		if (nearRK != null) {
 			if (nearbonus == null
-					|| self.getDistanceTo(nearRK) < (minDistance / 3))
+					|| self.getCrewHealth()>50&&self.getDistanceTo(nearRK) < (minDistance / 3))
 				nearbonus = nearRK;
 			minDistance = self.getDistanceTo(nearbonus);
 		}
 		if (nearAC != null) {
 			if (nearbonus == null
-					|| self.getDistanceTo(nearAC) < (minDistance / 3))
+					|| self.getCrewHealth()>50&&self.getDistanceTo(nearAC) < (minDistance / 3))
 				nearbonus = nearAC;
 			minDistance = self.getDistanceTo(nearbonus);
 		}
@@ -170,10 +170,10 @@ public final class MyStrategy implements Strategy {
 //								+ " self.getY()=" + (int) self.getY()
 //								+ " world.getHeight()=" + world.getHeight());
 				}
-			} else if (moveAngel > 0.5) {
+			} else if (moveAngel > 0.5 && moveAngel < 1.5||moveAngel > -2.5 && moveAngel < -1.5) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
-			} else if (moveAngel < -0.5) {
+			} else if (moveAngel < -0.5&&moveAngel > -1.5||moveAngel > 1.5 && moveAngel < 2.5) {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else // forward if (moveAngel > -0.5)
@@ -218,6 +218,7 @@ public final class MyStrategy implements Strategy {
 		Tank[] tanks = world.getTanks();
 		Bonus[] bonuses = world.getBonuses();
 		Shell[] shells = world.getShells();
+		
 		int i;
 		double minAngle = self.getTurretAngleTo(EnemyTank);
 		//move.setTurretTurn(minAngle);
@@ -225,15 +226,15 @@ public final class MyStrategy implements Strategy {
 		
 		for (i = 0; i < bonuses.length; i++) {
 			if((Math.abs(minAngle-self.getTurretAngleTo(bonuses[i]))<0.1)
-					&& dist < self.getDistanceTo(bonuses[i])) return false;
+					&& dist > self.getDistanceTo(bonuses[i])) return false;
 		}
 		for (i = 0; i < shells.length; i++) {
 			if((Math.abs(minAngle-self.getTurretAngleTo(shells[i]))<0.1)
-					&& dist < self.getDistanceTo(shells[i])) return false;
+					&& dist > self.getDistanceTo(shells[i])) return false;
 		}
 		for (i = 0; i < tanks.length; i++) {
 			if((Math.abs(minAngle-self.getTurretAngleTo(tanks[i]))<0.1)
-					&& dist < self.getDistanceTo(tanks[i])
+					&& dist > self.getDistanceTo(tanks[i])
 					&& (tanks[i].isTeammate() // Friend!!
 					|| tanks[i].getCrewHealth() == 0 // Dead!!!
 					|| tanks[i].getHullDurability() == 0) // Dead!!!
