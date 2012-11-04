@@ -3,7 +3,7 @@ import model.*;
 //import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
-	static boolean IsDebug = false;
+	static boolean IsDebug = true;
 	int numStrategy = 0;
 	long tid = 0;
 	Tank EnemyTank = null;
@@ -47,23 +47,22 @@ public final class MyStrategy implements Strategy {
 			double angleToEnemy) {
 		Shell[] shells = world.getShells();
 		int i;
-		//Shell dangerShell = null;
 		for (i = 0; i < shells.length; i++) {
 			if ((Math.abs(shells[i].getAngleTo(self)) < 0.1)
-					&& 100 < self.getDistanceTo(shells[i])) {
+					&& 50 < self.getDistanceTo(shells[i])) {
 				if (Math.abs(self.getAngleTo(shells[i])) < 1) { // turn
 					if (self.getAngleTo(shells[i]) < 0) {
 						move.setLeftTrackPower(1 * self
 								.getEngineRearPowerFactor());
 						move.setRightTrackPower(-1);
 						if (IsDebug)
-							System.out.println("escape-rotate R");
+							System.out.println(world.getTick()+" escape-rotate R "+(int)self.getDistanceTo(shells[i]));
 					} else {
 						move.setLeftTrackPower(-1);
 						move.setRightTrackPower(1 * self
 								.getEngineRearPowerFactor());
 						if (IsDebug)
-							System.out.println("escape-rotate L");
+							System.out.println(world.getTick()+" escape-rotate L "+(int)self.getDistanceTo(shells[i]));
 					}
 				} else {// move
 					if (move.getRightTrackPower() < 0
@@ -71,12 +70,12 @@ public final class MyStrategy implements Strategy {
 						move.setLeftTrackPower(-1);
 						move.setRightTrackPower(-1);
 						if (IsDebug)
-							System.out.println("escape-rotate forward");
+							System.out.println(world.getTick()+" escape-rotate forward "+(int)self.getDistanceTo(shells[i]));
 					} else {
 						move.setLeftTrackPower(1);
 						move.setRightTrackPower(1);
 						if (IsDebug)
-							System.out.println("escape-rotate Reverse");
+							System.out.println(world.getTick()+" escape-rotate Reverse "+(int)self.getDistanceTo(shells[i]));
 
 					}
 				}
@@ -253,33 +252,37 @@ public final class MyStrategy implements Strategy {
 		}
 	}
 
-	boolean myFire(Tank self, World world, Move move, Tank targetTank) {
+	private boolean myFire(Tank self, World world, Move move, Tank targetTank) {
 		Tank[] tanks = world.getTanks();
 		Bonus[] bonuses = world.getBonuses();
-		Shell[] shells = world.getShells();
+		Obstacle[] obstacles = world.getObstacles();
 
 		int i;
 		double minAngle = self.getTurretAngleTo(targetTank);
+		double dist = self.getDistanceTo(targetTank);
 		move.setTurretTurn(minAngle);
 
 		if ((self.getRemainingReloadingTime() > 0)
-				|| Math.abs(minAngle) > 20 / self.getDistanceTo(targetTank))
+				|| Math.abs(minAngle) > 20 / dist)
 			return false;
-		double dist = self.getDistanceTo(targetTank);
+
 
 		for (i = 0; i < bonuses.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 0.1)
+			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 1/self.getDistanceTo(bonuses[i]))
 					&& dist > self.getDistanceTo(bonuses[i]))
 				return false;
 		}
-		for (i = 0; i < shells.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(shells[i])) < 0.1)
-					&& dist > self.getDistanceTo(shells[i]))
+		for (i = 0; i < obstacles.length; i++) {
+			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < 1/self.getDistanceTo(obstacles[i]))
+					&& dist > self.getDistanceTo(obstacles[i]))
 				return false;
 		}
 		for (i = 0; i < tanks.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 0.1)
+			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 1/self.getDistanceTo(tanks[i]))
 					&& dist > self.getDistanceTo(tanks[i])
+					&& tanks[i]!=self
+							&&self.getDistanceTo(tanks[i])>0
+					&& tanks[i]!=targetTank
 					&& (tanks[i].isTeammate() // Friend!!
 							|| tanks[i].getCrewHealth() == 0 // Dead!!!
 					|| tanks[i].getHullDurability() == 0) // Dead!!!
@@ -288,7 +291,7 @@ public final class MyStrategy implements Strategy {
 		}
 		if (100 < dist
 				&& Math.abs(targetTank.getAngleTo(self) - minAngle) > 0.1
-				&& (targetTank.getSpeedX() + targetTank.getSpeedY()) > 100) {
+				&& (targetTank.getSpeedX() + targetTank.getSpeedY()) > 200) {
 			return false;
 		}
 		if (100 < dist)
