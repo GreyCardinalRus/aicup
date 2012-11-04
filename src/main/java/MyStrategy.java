@@ -3,7 +3,7 @@ import model.*;
 //import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
-	static boolean IsDebug = true;
+	static boolean IsDebug = false;
 	int numStrategy = 0;
 	long tid = 0;
 	Tank EnemyTank = null;
@@ -15,8 +15,8 @@ public final class MyStrategy implements Strategy {
 		// if (1 == teamSize)
 		// return TankType.TANK_DESTROYER;//HEAVY;
 		// return TankType.TANK_DESTROYER;
-		//return TankType.HEAVY;
-		 return TankType.MEDIUM;
+		// return TankType.HEAVY;
+		return TankType.MEDIUM;
 	}
 
 	@Override
@@ -43,12 +43,133 @@ public final class MyStrategy implements Strategy {
 
 	}
 
+	private void myMoveTank(Tank self, World world, Move move, double lp,
+			double rp) {
+		if ((lp > 0 && rp < 0) || (lp < 0 && rp > 0) || lp == 0 || rp == 0) {
+			move.setLeftTrackPower(lp);
+			move.setRightTrackPower(rp);
+		} else {
+			if (lp > 0 && rp > 0) {
+				if(self.getSpeedX()>0&&self.getX() > (world.getWidth() - 0.5 * (self
+						 .getWidth() + self.getHeight()))) 
+				{// Повернемся к миру передом
+					if(self.getAngle()>0)
+					{
+					 move.setLeftTrackPower(1);
+					 move.setRightTrackPower(-1);
+					}
+					else
+					{
+						move.setLeftTrackPower(-1);
+						move.setRightTrackPower(1);
+
+					}
+				}
+				else if(self.getSpeedX()<0&&self.getX() < ( 0.5 * (self
+						 .getWidth() + self.getHeight()))) 
+				{// Повернемся к миру передом
+					if(self.getAngle()>0)
+					{
+					 move.setLeftTrackPower(-1);
+					 move.setRightTrackPower(1);
+					}
+					else
+					{
+						move.setLeftTrackPower(1);
+						move.setRightTrackPower(-1);
+
+					}
+				}
+				else if(self.getSpeedY()>0&&self.getY() > (world.getHeight() - 0.5 * (self
+						 .getWidth() + self.getHeight()))) 
+				{// Повернемся к миру передом
+					if(self.getAngle()>1.5)
+					{
+					 move.setLeftTrackPower(1);
+					 move.setRightTrackPower(-1);
+					}
+					else
+					{
+						move.setLeftTrackPower(-1);
+						move.setRightTrackPower(1);
+
+					}
+				}
+				else if(self.getSpeedY()<0&&self.getY() < ( 0.5 * (self
+						 .getWidth() + self.getHeight()))) 
+				{// Повернемся к миру передом
+					if(self.getAngle()>-1.5)
+					{
+					 move.setLeftTrackPower(1);
+					 move.setRightTrackPower(-1);
+					}
+					else
+					{
+						move.setLeftTrackPower(-1);
+						move.setRightTrackPower(1);
+
+					}
+				}
+				// if (((self.getAngle() > -2.0 && self.getAngle() < -1.0)
+				// && self.getY() < (world.getHeight() - 0.5 * (self
+				// .getWidth() + self.getHeight()))
+				// || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
+				// && self.getY() > 0.5 * (self.getWidth() + self
+				// .getHeight())
+				// || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
+				// && self.getX() < (world.getWidth() - 0.5 * (self
+				// .getWidth() + self.getHeight())) || (self
+				// .getAngle() < -2.0 || self.getAngle() > 2.0)
+				// && self.getX() > (0.5 * (self.getWidth() + self
+				// .getHeight()))))
+				else
+				{
+					move.setLeftTrackPower(1);
+					move.setRightTrackPower(1);
+					// } else {
+					// if (IsDebug)
+					// System.out.println("Forward(" + world.getTick() + ")"
+					// + "self.getAngle()=" + (int) self.getAngle()
+					// + " self.getY()=" + (int) self.getY()
+					// + " world.getHeight()=" + world.getHeight()
+					// + " self.getX()=" + (int) self.getX()
+					// + " world.getWidth()=" + world.getWidth());
+				}
+
+			} else {
+				// if (((self.getAngle() > 2.0 || self.getAngle() < -2.0)
+				// && self.getY() > (0.5 * (self.getWidth() + self
+				// .getHeight()))
+				// || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
+				// && self.getY() < (world.getHeight() - 0.5 * (self
+				// .getWidth() + self.getHeight()))
+				// || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
+				// && self.getX() > (0.5 * (self.getWidth() + self
+				// .getHeight())) || (self.getAngle() > -2.0 && self
+				// .getAngle() < -1.0)
+				// && self.getX() < (world.getWidth() - 0.5 * (self
+				// .getWidth() + self.getHeight()))))
+				{
+					move.setLeftTrackPower(-1);
+					move.setRightTrackPower(-1);
+					// } else {
+					// if (IsDebug)
+					// System.out.println("Reverse(" + world.getTick() + ")"
+					// + "self.getAngle()=" + (int) self.getAngle()
+					// + " self.getY()=" + (int) self.getY()
+					// + " world.getHeight()=" + world.getHeight());
+				}
+
+			}
+		}
+	}
+
 	private void myMove(Tank self, World world, Move move, double angleToBonus,
 			double angleToEnemy) {
 		Shell[] shells = world.getShells();
 		int i;
 		for (i = 0; i < shells.length; i++) {
-			if ((Math.abs(shells[i].getAngleTo(self)) < 0.1)
+			if ((Math.abs(shells[i].getAngleTo(self)) < 5/self.getDistanceTo(shells[i]))
 					&& 50 < self.getDistanceTo(shells[i])) {
 				if (Math.abs(self.getAngleTo(shells[i])) < 1) { // turn
 					if (self.getAngleTo(shells[i]) < 0) {
@@ -56,13 +177,17 @@ public final class MyStrategy implements Strategy {
 								.getEngineRearPowerFactor());
 						move.setRightTrackPower(-1);
 						if (IsDebug)
-							System.out.println(world.getTick()+" escape-rotate R "+(int)self.getDistanceTo(shells[i]));
+							System.out.println(world.getTick()
+									+ " escape-rotate R "
+									+ (int) self.getDistanceTo(shells[i]));
 					} else {
 						move.setLeftTrackPower(-1);
 						move.setRightTrackPower(1 * self
 								.getEngineRearPowerFactor());
 						if (IsDebug)
-							System.out.println(world.getTick()+" escape-rotate L "+(int)self.getDistanceTo(shells[i]));
+							System.out.println(world.getTick()
+									+ " escape-rotate L "
+									+ (int) self.getDistanceTo(shells[i]));
 					}
 				} else {// move
 					if (move.getRightTrackPower() < 0
@@ -70,13 +195,16 @@ public final class MyStrategy implements Strategy {
 						move.setLeftTrackPower(-1);
 						move.setRightTrackPower(-1);
 						if (IsDebug)
-							System.out.println(world.getTick()+" escape-rotate forward "+(int)self.getDistanceTo(shells[i]));
+							System.out.println(world.getTick()
+									+ " escape-rotate forward "
+									+ (int) self.getDistanceTo(shells[i]));
 					} else {
 						move.setLeftTrackPower(1);
 						move.setRightTrackPower(1);
 						if (IsDebug)
-							System.out.println(world.getTick()+" escape-rotate Reverse "+(int)self.getDistanceTo(shells[i]));
-
+							System.out.println(world.getTick()
+									+ " escape-rotate Reverse "
+									+ (int) self.getDistanceTo(shells[i]));
 					}
 				}
 				return;
@@ -100,29 +228,9 @@ public final class MyStrategy implements Strategy {
 			if ((nearbonus == null)) {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(-1);
-			} else if (angleToBonus > 2.5 || angleToBonus < -2.5) { // reverce
-				// if (((self.getAngle() > 2.0 || self.getAngle() < -2.0)
-				// && self.getY() > (0.5 * (self.getWidth() + self
-				// .getHeight()))
-				// || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
-				// && self.getY() < (world.getHeight() - 0.5 * (self
-				// .getWidth() + self.getHeight()))
-				// || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
-				// && self.getX() > (0.5 * (self.getWidth() + self
-				// .getHeight())) || (self.getAngle() > -2.0 && self
-				// .getAngle() < -1.0)
-				// && self.getX() < (world.getWidth() - 0.5 * (self
-				// .getWidth() + self.getHeight()))))
-				{
-					move.setLeftTrackPower(-1);
-					move.setRightTrackPower(-1);
-					// } else {
-					// if (IsDebug)
-					// System.out.println("Reverse(" + world.getTick() + ")"
-					// + "self.getAngle()=" + (int) self.getAngle()
-					// + " self.getY()=" + (int) self.getY()
-					// + " world.getHeight()=" + world.getHeight());
-				}
+			} else if (angleToBonus > 2.5 || angleToBonus < -2.5) {
+				// reverse
+				myMoveTank(self, world, move, -1, -1);
 			} else if (angleToBonus > 0.5 && angleToBonus < 1.5
 					|| angleToBonus > -2.5 && angleToBonus < -1.5) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
@@ -133,30 +241,7 @@ public final class MyStrategy implements Strategy {
 				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else // forward if (moveAngel > -0.5)
 			{
-				// if (((self.getAngle() > -2.0 && self.getAngle() < -1.0)
-				// && self.getY() < (world.getHeight() - 0.5 * (self
-				// .getWidth() + self.getHeight()))
-				// || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
-				// && self.getY() > 0.5 * (self.getWidth() + self
-				// .getHeight())
-				// || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
-				// && self.getX() < (world.getWidth() - 0.5 * (self
-				// .getWidth() + self.getHeight())) || (self
-				// .getAngle() < -2.0 || self.getAngle() > 2.0)
-				// && self.getX() > (0.5 * (self.getWidth() + self
-				// .getHeight()))))
-				{
-					move.setLeftTrackPower(1);
-					move.setRightTrackPower(1);
-					// } else {
-					// if (IsDebug)
-					// System.out.println("Forward(" + world.getTick() + ")"
-					// + "self.getAngle()=" + (int) self.getAngle()
-					// + " self.getY()=" + (int) self.getY()
-					// + " world.getHeight()=" + world.getHeight()
-					// + " self.getX()=" + (int) self.getX()
-					// + " world.getWidth()=" + world.getWidth());
-				}
+				myMoveTank(self, world, move, 1, 1);
 			}
 		}
 	}
@@ -266,24 +351,25 @@ public final class MyStrategy implements Strategy {
 				|| Math.abs(minAngle) > 20 / dist)
 			return false;
 
-
 		for (i = 0; i < bonuses.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 1/self.getDistanceTo(bonuses[i]))
+			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 1 / self
+					.getDistanceTo(bonuses[i]))
 					&& dist > self.getDistanceTo(bonuses[i]))
 				return false;
 		}
 		for (i = 0; i < obstacles.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < 1/self.getDistanceTo(obstacles[i]))
+			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < 1 / self
+					.getDistanceTo(obstacles[i]))
 					&& dist > self.getDistanceTo(obstacles[i]))
 				return false;
 		}
 		for (i = 0; i < tanks.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 1/self.getDistanceTo(tanks[i]))
+			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 1 / self
+					.getDistanceTo(tanks[i]))
 					&& dist > self.getDistanceTo(tanks[i])
-					&& tanks[i]!=self
-							&&self.getDistanceTo(tanks[i])>0
-					&& tanks[i]!=targetTank
-					&& (tanks[i].isTeammate() // Friend!!
+					&& tanks[i] != self
+					&& self.getDistanceTo(tanks[i]) > 0
+					&& tanks[i] != targetTank && (tanks[i].isTeammate() // Friend!!
 							|| tanks[i].getCrewHealth() == 0 // Dead!!!
 					|| tanks[i].getHullDurability() == 0) // Dead!!!
 			)
