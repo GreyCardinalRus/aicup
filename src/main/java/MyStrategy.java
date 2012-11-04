@@ -9,7 +9,7 @@ public final class MyStrategy implements Strategy {
 	Tank EnemyTank = null;
 	Bonus nearbonus = null;
 	Player EnemyPlayer = null;
-	boolean oneEnimy = false;
+	int countEnimy = 0;
 
 	@Override
 	public TankType selectTank(int tankIndex, int teamSize) {
@@ -23,9 +23,9 @@ public final class MyStrategy implements Strategy {
 	@Override
 	public void move(Tank self, World world, Move move) {
 
-		getNearBonus(self, world);
-
 		getEnemy(self, world, move);
+
+		getNearBonus(self, world);
 
 		double angleToBonus = 3, angleToEnemy = 3;
 		if (!(nearbonus == null))
@@ -228,6 +228,15 @@ public final class MyStrategy implements Strategy {
 		int i;
 		int j;
 		EnemyPlayer = null;
+		countEnimy = 0;
+		for (i = 0; i < tanks.length; i++)
+			if (!tanks[i].isTeammate() // Enemy!!
+					&& tanks[i].getCrewHealth() > 0 // live!!!
+					&& tanks[i].getHullDurability() > 0 // live!!!
+			) {
+				countEnimy++;
+			}
+
 		// oneEnimy = true;
 		if (self.getRemainingReloadingTime() == 0) {
 			for (i = 0; i < tanks.length; i++)
@@ -267,11 +276,13 @@ public final class MyStrategy implements Strategy {
 		Bonus nearRK = null;
 		Bonus nearAC = null;
 		nearbonus = null;
-
+		int maxDistance = (int)(world.getHeight()/2);
+		if (countEnimy==1) maxDistance*=3;  
 		double minDistance = 10000;
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
-					&& bonuses[i].getType() == BonusType.MEDIKIT) {
+					&& bonuses[i].getType() == BonusType.MEDIKIT
+					&& self.getDistanceTo(bonuses[i])<maxDistance) {
 				nearMK = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -280,7 +291,8 @@ public final class MyStrategy implements Strategy {
 
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
-					&& bonuses[i].getType() == BonusType.REPAIR_KIT) {
+					&& bonuses[i].getType() == BonusType.REPAIR_KIT
+					&& self.getDistanceTo(bonuses[i])<maxDistance) {
 				nearRK = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -289,7 +301,8 @@ public final class MyStrategy implements Strategy {
 
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
-					&& bonuses[i].getType() == BonusType.AMMO_CRATE) {
+					&& bonuses[i].getType() == BonusType.AMMO_CRATE
+					&& self.getDistanceTo(bonuses[i])<maxDistance) {
 				nearAC = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
