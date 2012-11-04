@@ -19,24 +19,18 @@ public final class MyStrategy implements Strategy {
 
 	@Override
 	public void move(Tank self, World world, Move move) {
-		Tank[] tanks = world.getTanks();
-		Bonus[] bonuses = world.getBonuses();
-		Player[] players = world.getPlayers();
-		// Shell[] shells = world.getShells();
 
-		double minAngle = 3.0;
-	//	int i, j;
 
-		getNearBonus(self, bonuses);
+		getNearBonus(self, world);
 
-		getEnemy(self, world, move, tanks, players);
+		getEnemy(self, world, move);
 		
-		double moveAngel = 0;
+		double angleToBonus = 3,angleToEnemy=3;
 		if (!(nearbonus == null))
-			moveAngel = self.getAngleTo(nearbonus);
+			angleToBonus = self.getAngleTo(nearbonus);
 
 		if (EnemyTank != null) {
-			minAngle  = self.getTurretAngleTo(EnemyTank);
+			angleToEnemy  = self.getTurretAngleTo(EnemyTank);
 			myFire(self, world, move, EnemyTank);
 		} else {
 			if (IsDebug)
@@ -44,12 +38,18 @@ public final class MyStrategy implements Strategy {
 			move.setTurretTurn(1);
 		}
 		
+		myMove(self, move, angleToBonus, angleToEnemy);
+
+	}
+
+	private void myMove(Tank self, Move move, double angleToBonus,
+			double angleToEnemy) {
 		if (self.getRemainingReloadingTime() < 5
-				&& (minAngle > 0.1 || minAngle < -0.1)) {// Ready to fire
-			if (minAngle > 0.1) {
+				&& (angleToEnemy > 0.1 || angleToEnemy < -0.1)) {// Ready to fire
+			if (angleToEnemy > 0.1) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
-			} else if (moveAngel < -0.1) {
+			} else if (angleToBonus < -0.1) {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else {
@@ -60,7 +60,7 @@ public final class MyStrategy implements Strategy {
 			if ((nearbonus == null)) {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(-1);
-			} else if (moveAngel > 2.5 || moveAngel < -2.5) { // reverce
+			} else if (angleToBonus > 2.5 || angleToBonus < -2.5) { // reverce
 			// if (((self.getAngle() > 2.0 || self.getAngle() < -2.0)
 			// && self.getY() > (0.5 * (self.getWidth() + self
 			// .getHeight()))
@@ -83,12 +83,12 @@ public final class MyStrategy implements Strategy {
 					// + " self.getY()=" + (int) self.getY()
 					// + " world.getHeight()=" + world.getHeight());
 				}
-			} else if (moveAngel > 0.5 && moveAngel < 1.5 || moveAngel > -2.5
-					&& moveAngel < -1.5) {
+			} else if (angleToBonus > 0.5 && angleToBonus < 1.5 || angleToBonus > -2.5
+					&& angleToBonus < -1.5) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
-			} else if (moveAngel < -0.5 && moveAngel > -1.5 || moveAngel > 1.5
-					&& moveAngel < 2.5) {
+			} else if (angleToBonus < -0.5 && angleToBonus > -1.5 || angleToBonus > 1.5
+					&& angleToBonus < 2.5) {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else // forward if (moveAngel > -0.5)
@@ -119,11 +119,11 @@ public final class MyStrategy implements Strategy {
 				}
 			}
 		}
-
 	}
 
-	private void getEnemy(Tank self, World world, Move move, Tank[] tanks,
-			Player[] players) {
+	private void getEnemy(Tank self, World world, Move move) {
+		Tank[] tanks = world.getTanks();
+		Player[] players = world.getPlayers();
 		int i;
 		int j;
 		EnemyPlayer = null;
@@ -158,7 +158,8 @@ public final class MyStrategy implements Strategy {
 				}
 	}
 
-	private void getNearBonus(Tank self, Bonus[] bonuses) {
+	private void getNearBonus(Tank self, World world) {
+		Bonus[] bonuses = world.getBonuses();
 		int i;
 		Bonus nearMK = null;
 		Bonus nearRK = null;
