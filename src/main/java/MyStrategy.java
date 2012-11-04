@@ -3,7 +3,7 @@ import model.*;
 //import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
-	static boolean IsDebug = true;
+	static boolean IsDebug = false;
 	int numStrategy = 0;
 	long tid = 0;
 	Tank EnemyTank = null;
@@ -14,7 +14,9 @@ public final class MyStrategy implements Strategy {
 	public TankType selectTank(int tankIndex, int teamSize) {
 		// if (1 == teamSize)
 		// return TankType.TANK_DESTROYER;//HEAVY;
-		return TankType.MEDIUM;
+		// return TankType.TANK_DESTROYER;
+		//return TankType.HEAVY;
+		 return TankType.MEDIUM;
 	}
 
 	@Override
@@ -37,12 +39,51 @@ public final class MyStrategy implements Strategy {
 			move.setTurretTurn(1);
 		}
 
-		myMove(self, move, angleToBonus, angleToEnemy);
+		myMove(self, world, move, angleToBonus, angleToEnemy);
 
 	}
 
-	private void myMove(Tank self, Move move, double angleToBonus,
+	private void myMove(Tank self, World world, Move move, double angleToBonus,
 			double angleToEnemy) {
+		Shell[] shells = world.getShells();
+		int i;
+		//Shell dangerShell = null;
+		for (i = 0; i < shells.length; i++) {
+			if ((Math.abs(shells[i].getAngleTo(self)) < 0.1)
+					&& 100 < self.getDistanceTo(shells[i])) {
+				if (Math.abs(self.getAngleTo(shells[i])) < 1) { // turn
+					if (self.getAngleTo(shells[i]) < 0) {
+						move.setLeftTrackPower(1 * self
+								.getEngineRearPowerFactor());
+						move.setRightTrackPower(-1);
+						if (IsDebug)
+							System.out.println("escape-rotate R");
+					} else {
+						move.setLeftTrackPower(-1);
+						move.setRightTrackPower(1 * self
+								.getEngineRearPowerFactor());
+						if (IsDebug)
+							System.out.println("escape-rotate L");
+					}
+				} else {// move
+					if (move.getRightTrackPower() < 0
+							&& move.getLeftTrackPower() < 0) {
+						move.setLeftTrackPower(-1);
+						move.setRightTrackPower(-1);
+						if (IsDebug)
+							System.out.println("escape-rotate forward");
+					} else {
+						move.setLeftTrackPower(1);
+						move.setRightTrackPower(1);
+						if (IsDebug)
+							System.out.println("escape-rotate Reverse");
+
+					}
+				}
+				return;
+			}
+		}
+
 		if (self.getRemainingReloadingTime() < 5
 				&& (angleToEnemy > 0.1 || angleToEnemy < -0.1)) {// Ready to
 																	// fire
@@ -221,9 +262,9 @@ public final class MyStrategy implements Strategy {
 		double minAngle = self.getTurretAngleTo(targetTank);
 		move.setTurretTurn(minAngle);
 
-		if ((self.getRemainingReloadingTime() > 0)||Math.abs(minAngle) > 20 / self
-				.getDistanceTo(targetTank))
-						return false;
+		if ((self.getRemainingReloadingTime() > 0)
+				|| Math.abs(minAngle) > 20 / self.getDistanceTo(targetTank))
+			return false;
 		double dist = self.getDistanceTo(targetTank);
 
 		for (i = 0; i < bonuses.length; i++) {
@@ -245,7 +286,9 @@ public final class MyStrategy implements Strategy {
 			)
 				return false;
 		}
-		if (100 < dist&&Math.abs(targetTank.getAngleTo(self)-minAngle)>0.1&&(targetTank.getSpeedX()+targetTank.getSpeedY())>100) {
+		if (100 < dist
+				&& Math.abs(targetTank.getAngleTo(self) - minAngle) > 0.1
+				&& (targetTank.getSpeedX() + targetTank.getSpeedY()) > 100) {
 			return false;
 		}
 		if (100 < dist)
