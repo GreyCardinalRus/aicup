@@ -20,24 +20,23 @@ public final class MyStrategy implements Strategy {
 	@Override
 	public void move(Tank self, World world, Move move) {
 
-
 		getNearBonus(self, world);
 
 		getEnemy(self, world, move);
-		
-		double angleToBonus = 3,angleToEnemy=3;
+
+		double angleToBonus = 3, angleToEnemy = 3;
 		if (!(nearbonus == null))
 			angleToBonus = self.getAngleTo(nearbonus);
 
 		if (EnemyTank != null) {
-			angleToEnemy  = self.getTurretAngleTo(EnemyTank);
+			angleToEnemy = self.getTurretAngleTo(EnemyTank);
 			myFire(self, world, move, EnemyTank);
 		} else {
 			if (IsDebug)
 				System.out.println("lost Target:");
 			move.setTurretTurn(1);
 		}
-		
+
 		myMove(self, move, angleToBonus, angleToEnemy);
 
 	}
@@ -45,7 +44,8 @@ public final class MyStrategy implements Strategy {
 	private void myMove(Tank self, Move move, double angleToBonus,
 			double angleToEnemy) {
 		if (self.getRemainingReloadingTime() < 5
-				&& (angleToEnemy > 0.1 || angleToEnemy < -0.1)) {// Ready to fire
+				&& (angleToEnemy > 0.1 || angleToEnemy < -0.1)) {// Ready to
+																	// fire
 			if (angleToEnemy > 0.1) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
@@ -61,18 +61,18 @@ public final class MyStrategy implements Strategy {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(-1);
 			} else if (angleToBonus > 2.5 || angleToBonus < -2.5) { // reverce
-			// if (((self.getAngle() > 2.0 || self.getAngle() < -2.0)
-			// && self.getY() > (0.5 * (self.getWidth() + self
-			// .getHeight()))
-			// || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
-			// && self.getY() < (world.getHeight() - 0.5 * (self
-			// .getWidth() + self.getHeight()))
-			// || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
-			// && self.getX() > (0.5 * (self.getWidth() + self
-			// .getHeight())) || (self.getAngle() > -2.0 && self
-			// .getAngle() < -1.0)
-			// && self.getX() < (world.getWidth() - 0.5 * (self
-			// .getWidth() + self.getHeight()))))
+				// if (((self.getAngle() > 2.0 || self.getAngle() < -2.0)
+				// && self.getY() > (0.5 * (self.getWidth() + self
+				// .getHeight()))
+				// || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
+				// && self.getY() < (world.getHeight() - 0.5 * (self
+				// .getWidth() + self.getHeight()))
+				// || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
+				// && self.getX() > (0.5 * (self.getWidth() + self
+				// .getHeight())) || (self.getAngle() > -2.0 && self
+				// .getAngle() < -1.0)
+				// && self.getX() < (world.getWidth() - 0.5 * (self
+				// .getWidth() + self.getHeight()))))
 				{
 					move.setLeftTrackPower(-1);
 					move.setRightTrackPower(-1);
@@ -83,12 +83,12 @@ public final class MyStrategy implements Strategy {
 					// + " self.getY()=" + (int) self.getY()
 					// + " world.getHeight()=" + world.getHeight());
 				}
-			} else if (angleToBonus > 0.5 && angleToBonus < 1.5 || angleToBonus > -2.5
-					&& angleToBonus < -1.5) {
+			} else if (angleToBonus > 0.5 && angleToBonus < 1.5
+					|| angleToBonus > -2.5 && angleToBonus < -1.5) {
 				move.setLeftTrackPower(1 * self.getEngineRearPowerFactor());
 				move.setRightTrackPower(-1);
-			} else if (angleToBonus < -0.5 && angleToBonus > -1.5 || angleToBonus > 1.5
-					&& angleToBonus < 2.5) {
+			} else if (angleToBonus < -0.5 && angleToBonus > -1.5
+					|| angleToBonus > 1.5 && angleToBonus < 2.5) {
 				move.setLeftTrackPower(-1);
 				move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
 			} else // forward if (moveAngel > -0.5)
@@ -221,9 +221,10 @@ public final class MyStrategy implements Strategy {
 		double minAngle = self.getTurretAngleTo(targetTank);
 		move.setTurretTurn(minAngle);
 
-		if (self.getRemainingReloadingTime() > 0) return false;
+		if ((self.getRemainingReloadingTime() > 0)||Math.abs(minAngle) > 20 / self
+				.getDistanceTo(targetTank))
+						return false;
 		double dist = self.getDistanceTo(targetTank);
-
 
 		for (i = 0; i < bonuses.length; i++) {
 			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 0.1)
@@ -243,6 +244,9 @@ public final class MyStrategy implements Strategy {
 					|| tanks[i].getHullDurability() == 0) // Dead!!!
 			)
 				return false;
+		}
+		if (100 < dist&&Math.abs(targetTank.getAngleTo(self)-minAngle)>0.1&&(targetTank.getSpeedX()+targetTank.getSpeedY())>100) {
+			return false;
 		}
 		if (100 < dist)
 			move.setFireType(FireType.REGULAR);
