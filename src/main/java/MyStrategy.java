@@ -100,7 +100,7 @@ public final class MyStrategy implements Strategy {
 		}
 
 		// Feady to Fire- turn to Enemy
-		if (self.getRemainingReloadingTime() < 3
+		if (self.getRemainingReloadingTime() < (self.getType()==TankType.MEDIUM?3:self.getType()==TankType.HEAVY?6:15)
 				&& (angleToEnemy > 0.1 || angleToEnemy < -0.1)) {// Ready to
 																	// fire
 			if (angleToEnemy > 0.1) {
@@ -125,7 +125,7 @@ public final class MyStrategy implements Strategy {
 						System.out.println(world.getTick()
 								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getX())+" world.getWidth()= "+(world.getWidth() - 0.5 * (self.getWidth() + self
 								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
-					return;	
+					//return;	
 				}
 				else if(self.getX() < (0.5 * (self.getWidth() + self
 						.getHeight())))
@@ -137,7 +137,7 @@ public final class MyStrategy implements Strategy {
 						System.out.println(world.getTick()
 								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getX())+" world.getWidth()= "+(world.getWidth() - 0.5 * (self.getWidth() + self
 								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
-					return;	
+					//return;	
 
 				}
 				else if ( self.getY() > (world.getHeight() - 0.5 * (self
@@ -150,7 +150,7 @@ public final class MyStrategy implements Strategy {
 						System.out.println(world.getTick()
 								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getY())+" world.getWidth()= "+(world.getHeight() - 0.5 * (self.getHeight() + self
 								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
-					return;	
+					//return;	
 				}
 				else if ( self.getY() < ( 0.5 * (self
 						.getWidth() + self.getHeight())))
@@ -162,8 +162,11 @@ public final class MyStrategy implements Strategy {
 						System.out.println(world.getTick()
 								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getY())+" world.getWidth()= "+(world.getHeight() - 0.5 * (self.getHeight() + self
 								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
-					return;	
+					//return;	
 				} else myMoveTank(self, world, move, -1, -1);
+				// довернем пушку "обратно"
+				if(move.getRightTrackPower()<0&&move.getLeftTrackPower()>0) move.setTurretTurn(-5);
+				else if(move.getRightTrackPower()>0&&move.getLeftTrackPower()<0) move.setTurretTurn(5); 
 			} else if (angleToBonus > 2.5 || angleToBonus < -2.5) {
 				// reverse
 				myMoveTank(self, world, move, -1, -1);
@@ -188,24 +191,25 @@ public final class MyStrategy implements Strategy {
 		//Obstacle[] obstacles = world.getObstacles();
 		int i;
 		int j;
-		EnemyPlayer = null;
+		EnemyPlayer = null; EnemyTank= null;
 		countEnimy = 0;
-
+        //Tank EnimyMy=null;
 		for (i = 0; i < tanks.length; i++)
 			if (!tanks[i].isTeammate() // Enemy!!
 					&& tanks[i].getCrewHealth() > 0 // live!!!
 					&& tanks[i].getHullDurability() > 0 // live!!!
 			) {
+				if(Math.abs(tanks[i].getTurretAngleTo(self))<0.1) EnemyTank=tanks[i];
 				countEnimy++;
 			}
 
-		// oneEnimy = true;
 		if (self.getRemainingReloadingTime() == 0) {
 			for (i = 0; i < tanks.length; i++)
 				if (!tanks[i].isTeammate() // Enemy!!
 						&& tanks[i].getCrewHealth() > 0 // live!!!
 						&& tanks[i].getHullDurability() > 0 // live!!!
-						&& Math.abs(self.getTurretAngleTo(tanks[i])) < 20 / self
+						//&& isVisible(self, world, tanks[i])
+						&& Math.abs(self.getTurretAngleTo(tanks[i])) < 10 / self
 								.getDistanceTo(tanks[i])
 						&& self.getDistanceTo(tanks[i]) < 300
 						&& myFire(self, world, move, tanks[i])) {
@@ -215,13 +219,15 @@ public final class MyStrategy implements Strategy {
 
 		}
 		double nearAngle = 3;
+		if(EnemyTank==null)
 		for (i = 0; i < tanks.length; i++)
 			if (!tanks[i].isTeammate() // Enemy!!
 					&& tanks[i].getCrewHealth() > 0 // live!!!
 					&& tanks[i].getHullDurability() > 0 // live!!!
+					&& isVisible(self, world, tanks[i])
 					//&& myFire(self, world, move, tanks[i])
 					)
-				if (countEnimy < 4) {
+				if (countEnimy < 3) {
 					for (j = 0; j < players.length; j++) {
 						if (tanks[i].getPlayerName().equals(
 								players[j].getName())
@@ -256,7 +262,8 @@ public final class MyStrategy implements Strategy {
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
 					&& bonuses[i].getType() == BonusType.MEDIKIT
-					&& self.getDistanceTo(bonuses[i]) < maxDistance) {
+					&& self.getDistanceTo(bonuses[i]) < maxDistance
+					&& isVisible(self, world, bonuses[i])) {
 				nearMK = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -266,7 +273,8 @@ public final class MyStrategy implements Strategy {
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
 					&& bonuses[i].getType() == BonusType.REPAIR_KIT
-					&& self.getDistanceTo(bonuses[i]) < maxDistance) {
+					&& self.getDistanceTo(bonuses[i]) < maxDistance
+					&& isVisible(self, world, bonuses[i])) {
 				nearRK = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -276,7 +284,8 @@ public final class MyStrategy implements Strategy {
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
 					&& bonuses[i].getType() == BonusType.AMMO_CRATE
-					&& self.getDistanceTo(bonuses[i]) < maxDistance) {
+					&& self.getDistanceTo(bonuses[i]) < maxDistance
+					&& isVisible(self, world, bonuses[i])) {
 				nearAC = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -300,7 +309,38 @@ public final class MyStrategy implements Strategy {
 			minDistance = self.getDistanceTo(nearbonus);
 		}
 	}
-
+	
+	private boolean isVisible(Tank self, World world, Unit targetUnit) {
+		Tank[] tanks = world.getTanks();
+		Bonus[] bonuses = world.getBonuses();
+		Obstacle[] obstacles = world.getObstacles();
+		int i;
+		double minAngle = self.getTurretAngleTo(targetUnit);
+		double dist = self.getDistanceTo(targetUnit);
+		
+		for (i = 0; i < bonuses.length; i++) {
+			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 10 / self
+					.getDistanceTo(bonuses[i]))
+					&& dist > self.getDistanceTo(bonuses[i]))
+				return false;
+		}
+		for (i = 0; i < obstacles.length; i++) {
+			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < 10 / self
+					.getDistanceTo(obstacles[i]))
+					&& dist > self.getDistanceTo(obstacles[i]))
+				return false;
+		}
+		for (i = 0; i < tanks.length; i++) {
+			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 100 / self
+					.getDistanceTo(tanks[i]))
+					&& dist > self.getDistanceTo(tanks[i])
+					&& self.getDistanceTo(tanks[i]) > 0)
+				return false;
+		}
+		
+		return true;
+	}
+	
 	private boolean myFire(Tank self, World world, Move move, Tank targetTank) {
 		Tank[] tanks = world.getTanks();
 		Bonus[] bonuses = world.getBonuses();
@@ -312,26 +352,25 @@ public final class MyStrategy implements Strategy {
 		move.setTurretTurn(minAngle);
 
 		if ((self.getRemainingReloadingTime() > 0)
-				|| Math.abs(minAngle) > 20 / dist)
+				|| Math.abs(minAngle) > 10 / dist)
 			return false;
 
 		for (i = 0; i < bonuses.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 1 / self
+			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < 10 / self
 					.getDistanceTo(bonuses[i]))
 					&& dist > self.getDistanceTo(bonuses[i]))
 				return false;
 		}
 		for (i = 0; i < obstacles.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < 1 / self
+			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < (obstacles[i].getHeight()+obstacles[i].getWidth())*0.5 / self
 					.getDistanceTo(obstacles[i]))
 					&& dist > self.getDistanceTo(obstacles[i]))
 				return false;
 		}
 		for (i = 0; i < tanks.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 1 / self
+			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < 10 / self
 					.getDistanceTo(tanks[i]))
 					&& dist > self.getDistanceTo(tanks[i])
-					&& tanks[i] != self
 					&& self.getDistanceTo(tanks[i]) > 0
 					&& tanks[i] != targetTank && (tanks[i].isTeammate() // Friend!!
 							|| tanks[i].getCrewHealth() == 0 // Dead!!!
@@ -340,8 +379,8 @@ public final class MyStrategy implements Strategy {
 				return false;
 		}
 		if (100 < dist
-				&& Math.abs(targetTank.getAngleTo(self) - minAngle) > 0.1
-				&& (targetTank.getSpeedX() + targetTank.getSpeedY()) > 200) {
+				&& (Math.abs(targetTank.getAngleTo(self) - minAngle) > 1/dist
+						&& (targetTank.getSpeedX() + targetTank.getSpeedY()) > 1)) {
 			return false;
 		}
 		if (100 < dist)
