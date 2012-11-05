@@ -245,6 +245,32 @@ public final class MyStrategy implements Strategy {
 					}
 
 				}
+		if(EnemyTank==null)// not found visible...
+		for (i = 0; i < tanks.length; i++)
+			if (!tanks[i].isTeammate() // Enemy!!
+					&& tanks[i].getCrewHealth() > 0 // live!!!
+					&& tanks[i].getHullDurability() > 0 // live!!!
+					//&& isVisible(self, world, tanks[i])
+					//&& myFire(self, world, move, tanks[i])
+					)
+				if (countEnimy < 3) {
+					for (j = 0; j < players.length; j++) {
+						if (tanks[i].getPlayerName().equals(
+								players[j].getName())
+								&& (EnemyPlayer == null || players[j]
+										.getScore() > EnemyPlayer.getScore())) {
+							EnemyPlayer = players[j];
+							EnemyTank = tanks[i];
+						}
+
+					}
+				} else {
+					if (self.getTurretAngleTo(tanks[i]) < nearAngle) {
+						nearAngle = self.getTurretAngleTo(tanks[i]);
+						EnemyTank = tanks[i];
+					}
+
+				}
 
 	}
 
