@@ -46,105 +46,15 @@ public final class MyStrategy implements Strategy {
 
 	private void myMoveTank(Tank self, World world, Move move, double lp,
 			double rp) {
-		if ((lp > 0 && rp < 0) || (lp < 0 && rp > 0) || lp == 0 || rp == 0) {
 			move.setLeftTrackPower(lp);
 			move.setRightTrackPower(rp);
-		} else {
-
-			if (self.getSpeedX() > 0
-					&& self.getX() > (world.getWidth() - 0.5 * (self.getWidth() + self
-							.getHeight()))) {// Повернемся
-												// к миру
-												// передом
-				if (self.getAngle() > 0 && (lp > 0 && rp > 0)) {
-					move.setLeftTrackPower(1);
-					move.setRightTrackPower(-1);
-				} else {
-					move.setLeftTrackPower(-1);
-					move.setRightTrackPower(1);
-
-				}
-			} else if (self.getSpeedX() < 0
-					&& self.getX() < (0.5 * (self.getWidth() + self.getHeight()))) {// Повернемся
-																					// к
-																					// миру
-																					// передом
-				if (self.getAngle() > 0 && (lp > 0 && rp > 0)) {
-					move.setLeftTrackPower(-1);
-					move.setRightTrackPower(1);
-				} else {
-					move.setLeftTrackPower(1);
-					move.setRightTrackPower(-1);
-
-				}
-			} else if (self.getSpeedY() > 0
-					&& self.getY() > (world.getHeight() - 0.5 * (self
-							.getWidth() + self.getHeight()))) {// Повернемся
-																// к миру
-																// передом
-				if (self.getAngle() > 1.5 && (lp > 0 && rp > 0)) {
-					move.setLeftTrackPower(1);
-					move.setRightTrackPower(-1);
-				} else {
-					move.setLeftTrackPower(-1);
-					move.setRightTrackPower(1);
-
-				}
-			} else if (self.getSpeedY() < 0
-					&& self.getY() < (0.5 * (self.getWidth() + self.getHeight()))) {// Повернемся
-																					// к
-																					// миру
-																					// передом
-				if (self.getAngle() > -1.5 && (lp > 0 && rp > 0)) {
-					move.setLeftTrackPower(1);
-					move.setRightTrackPower(-1);
-				} else {
-					move.setLeftTrackPower(-1);
-					move.setRightTrackPower(1);
-
-				}
-			} else {
-				if (lp > 0 && rp > 0) {
-					move.setLeftTrackPower(1);
-					move.setRightTrackPower(1);
-				} else {
-					move.setLeftTrackPower(-1);
-					move.setRightTrackPower(-1);
-				}
-			}
-
-			// } else {
-			// // if (((self.getAngle() > 2.0 || self.getAngle() < -2.0)
-			// // && self.getY() > (0.5 * (self.getWidth() + self
-			// // .getHeight()))
-			// // || (self.getAngle() > -1.0 && self.getAngle() < 1.0)
-			// // && self.getY() < (world.getHeight() - 0.5 * (self
-			// // .getWidth() + self.getHeight()))
-			// // || (self.getAngle() > 1.0 && self.getAngle() < 2.0)
-			// // && self.getX() > (0.5 * (self.getWidth() + self
-			// // .getHeight())) || (self.getAngle() > -2.0 && self
-			// // .getAngle() < -1.0)
-			// // && self.getX() < (world.getWidth() - 0.5 * (self
-			// // .getWidth() + self.getHeight()))))
-			// {
-			// move.setLeftTrackPower(-1);
-			// move.setRightTrackPower(-1);
-			// // } else {
-			// // if (IsDebug)
-			// // System.out.println("Reverse(" + world.getTick() + ")"
-			// // + "self.getAngle()=" + (int) self.getAngle()
-			// // + " self.getY()=" + (int) self.getY()
-			// // + " world.getHeight()=" + world.getHeight());
-			// }
-
-		}
-
 	}
 
 	private void myMove(Tank self, World world, Move move, double angleToBonus,
 			double angleToEnemy) {
 		Shell[] shells = world.getShells();
 		int i;
+		// Escape
 		for (i = 0; i < shells.length; i++) {
 			if ((Math.abs(shells[i].getAngleTo(self)) < 5 / self
 					.getDistanceTo(shells[i]))
@@ -189,6 +99,7 @@ public final class MyStrategy implements Strategy {
 			}
 		}
 
+		// Feady to Fire- turn to Enemy
 		if (self.getRemainingReloadingTime() < 3
 				&& (angleToEnemy > 0.1 || angleToEnemy < -0.1)) {// Ready to
 																	// fire
@@ -201,9 +112,58 @@ public final class MyStrategy implements Strategy {
 			} else {
 				myMoveTank(self, world, move, -1, -1);
 			}
-		} else {
+		} else { // Move to bonus
 			if ((nearbonus == null)) {
-				myMoveTank(self, world, move, -1, -1);
+		        //  Повернемся к миру передом
+				if(self.getX() > (world.getWidth() - 0.5 * (self.getWidth() + self
+									.getHeight())))
+				{
+					if(self.getAngle()>-2&&self.getAngle()<0) myMoveTank(self, world, move, 0, 1);
+					else if(self.getAngle()>0&&self.getAngle()<2) myMoveTank(self, world, move, 1, 0);
+					else myMoveTank(self, world, move, 1, 1);
+					if (IsDebug)
+						System.out.println(world.getTick()
+								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getX())+" world.getWidth()= "+(world.getWidth() - 0.5 * (self.getWidth() + self
+								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
+					return;	
+				}
+				else if(self.getX() < (0.5 * (self.getWidth() + self
+						.getHeight())))
+				{
+					if(self.getAngle()<-1) myMoveTank(self, world, move,1, 0);
+					else if(self.getAngle()<1) myMoveTank(self, world, move, 0, 1);
+					else myMoveTank(self, world, move, 1, 1);
+					if (IsDebug)
+						System.out.println(world.getTick()
+								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getX())+" world.getWidth()= "+(world.getWidth() - 0.5 * (self.getWidth() + self
+								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
+					return;	
+
+				}
+				else if ( self.getY() > (world.getHeight() - 0.5 * (self
+								.getWidth() + self.getHeight())))
+				{
+					if(self.getAngle()>-2&&self.getAngle()<-1) myMoveTank(self, world, move, 1, 1);
+					else if(self.getAngle()>-1&&self.getAngle()<1.5) myMoveTank(self, world, move, 0, 1);
+					else myMoveTank(self, world, move, 1, 0);
+					if (IsDebug)
+						System.out.println(world.getTick()
+								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getY())+" world.getWidth()= "+(world.getHeight() - 0.5 * (self.getHeight() + self
+								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
+					return;	
+				}
+				else if ( self.getY() < ( 0.5 * (self
+						.getWidth() + self.getHeight())))
+				{
+					if(self.getAngle()>1&&self.getAngle()<2) myMoveTank(self, world, move, 1, 1);
+					else if(self.getAngle()>-1.5&self.getAngle()<1) myMoveTank(self, world, move, 1, 0);
+					else myMoveTank(self, world, move, 0, 1);
+					if (IsDebug)
+						System.out.println(world.getTick()
+								+" self.getAngle():"+Math.round(10*self.getAngle())/10+" self.getX()="+Math.round(self.getY())+" world.getWidth()= "+(world.getHeight() - 0.5 * (self.getHeight() + self
+								.getHeight()))+" RE="+move.getRightTrackPower()+" LE="+move.getLeftTrackPower());
+					return;	
+				} else myMoveTank(self, world, move, -1, -1);
 			} else if (angleToBonus > 2.5 || angleToBonus < -2.5) {
 				// reverse
 				myMoveTank(self, world, move, -1, -1);
@@ -225,10 +185,12 @@ public final class MyStrategy implements Strategy {
 	private void getEnemy(Tank self, World world, Move move) {
 		Tank[] tanks = world.getTanks();
 		Player[] players = world.getPlayers();
+		//Obstacle[] obstacles = world.getObstacles();
 		int i;
 		int j;
 		EnemyPlayer = null;
 		countEnimy = 0;
+
 		for (i = 0; i < tanks.length; i++)
 			if (!tanks[i].isTeammate() // Enemy!!
 					&& tanks[i].getCrewHealth() > 0 // live!!!
@@ -245,28 +207,39 @@ public final class MyStrategy implements Strategy {
 						&& tanks[i].getHullDurability() > 0 // live!!!
 						&& Math.abs(self.getTurretAngleTo(tanks[i])) < 20 / self
 								.getDistanceTo(tanks[i])
-						&& self.getDistanceTo(tanks[i]) < 100
+						&& self.getDistanceTo(tanks[i]) < 300
 						&& myFire(self, world, move, tanks[i])) {
 					EnemyTank = tanks[i];
 					break;
 				}
 
 		}
-
+		double nearAngle = 3;
 		for (i = 0; i < tanks.length; i++)
 			if (!tanks[i].isTeammate() // Enemy!!
 					&& tanks[i].getCrewHealth() > 0 // live!!!
 					&& tanks[i].getHullDurability() > 0 // live!!!
-			)
-				for (j = 0; j < players.length; j++) {
-					if (tanks[i].getPlayerName().equals(players[j].getName())
-							&& (EnemyPlayer == null || players[j].getScore() > EnemyPlayer
-									.getScore())) {
-						EnemyPlayer = players[j];
+					//&& myFire(self, world, move, tanks[i])
+					)
+				if (countEnimy < 4) {
+					for (j = 0; j < players.length; j++) {
+						if (tanks[i].getPlayerName().equals(
+								players[j].getName())
+								&& (EnemyPlayer == null || players[j]
+										.getScore() > EnemyPlayer.getScore())) {
+							EnemyPlayer = players[j];
+							EnemyTank = tanks[i];
+						}
+
+					}
+				} else {
+					if (self.getTurretAngleTo(tanks[i]) < nearAngle) {
+						nearAngle = self.getTurretAngleTo(tanks[i]);
 						EnemyTank = tanks[i];
 					}
 
 				}
+
 	}
 
 	private void getNearBonus(Tank self, World world) {
@@ -276,13 +249,14 @@ public final class MyStrategy implements Strategy {
 		Bonus nearRK = null;
 		Bonus nearAC = null;
 		nearbonus = null;
-		int maxDistance = (int)(world.getHeight()/2);
-		if (countEnimy==1) maxDistance*=3;  
+		int maxDistance = (int) (world.getHeight() / 2);
+		if (countEnimy < 3)
+			maxDistance *= 3;
 		double minDistance = 10000;
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
 					&& bonuses[i].getType() == BonusType.MEDIKIT
-					&& self.getDistanceTo(bonuses[i])<maxDistance) {
+					&& self.getDistanceTo(bonuses[i]) < maxDistance) {
 				nearMK = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -292,7 +266,7 @@ public final class MyStrategy implements Strategy {
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
 					&& bonuses[i].getType() == BonusType.REPAIR_KIT
-					&& self.getDistanceTo(bonuses[i])<maxDistance) {
+					&& self.getDistanceTo(bonuses[i]) < maxDistance) {
 				nearRK = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
@@ -302,7 +276,7 @@ public final class MyStrategy implements Strategy {
 		for (i = 0; i < bonuses.length; i++) {
 			if (minDistance > self.getDistanceTo(bonuses[i])
 					&& bonuses[i].getType() == BonusType.AMMO_CRATE
-					&& self.getDistanceTo(bonuses[i])<maxDistance) {
+					&& self.getDistanceTo(bonuses[i]) < maxDistance) {
 				nearAC = bonuses[i];
 				minDistance = self.getDistanceTo(bonuses[i]);
 			}
