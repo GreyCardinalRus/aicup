@@ -528,4 +528,13 @@ double getTargetAngle(Tank from,Unit to)
  {
 	return Math.atan((to.getWidth()+to.getWidth())/from.getDistanceTo(to)/2)/2;
  }
+
+double getAngleToTarget(Tank from,Unit target)
+{
+   double a = from.getTurretAngleTo(target);
+   // поправка на скорость
+   return a;
+	//return Math.atan((target.getWidth()+target.getWidth())/from.getDistanceTo(target)/2)/2;
+}
+
 }
