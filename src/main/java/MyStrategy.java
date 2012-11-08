@@ -112,7 +112,7 @@ public final class MyStrategy implements Strategy {
 		if (isChicken)
 			for (i = 0; i < shells.length; i++) {
 				if ((Math.abs(shells[i].getAngleTo(mySelf)) < getTargetAngle(shells[i],mySelf)*2)
-						&& isVisible(mySelf, shells[i])
+						&& isVisible(shells[i],mySelf)
 						&& 50 < mySelf.getDistanceTo(shells[i])) {
 					if (Math.abs(mySelf.getAngleTo(shells[i])) < 1) { // turn
 						if (mySelf.getAngleTo(shells[i]) < 0||mySelf.getAngleTo(shells[i]) > 2.5) {
@@ -447,26 +447,26 @@ public final class MyStrategy implements Strategy {
 			nearbonus = nearMK;
 	}
 
-	private boolean isVisible(Tank self, Unit targetUnit) {
+	private boolean isVisible(Unit self, Unit targetUnit) {
 		Tank[] tanks = myWorld.getTanks();
 		Bonus[] bonuses = myWorld.getBonuses();
 		Obstacle[] obstacles = myWorld.getObstacles();
 		int i;
-		double minAngle = self.getTurretAngleTo(targetUnit);
+		double minAngle = (self instanceof Tank?((Tank)self).getTurretAngleTo(targetUnit):self.getAngleTo(targetUnit));
 		double dist = self.getDistanceTo(targetUnit);
 
 		for (i = 0; i < bonuses.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < getTargetAngle(mySelf,bonuses[i]))
+			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(bonuses[i]):self.getAngleTo(bonuses[i]))) < getTargetAngle(mySelf,bonuses[i]))
 					&& dist > self.getDistanceTo(bonuses[i]))
 				return false;
 		}
 		for (i = 0; i < obstacles.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(obstacles[i])) < getTargetAngle(mySelf,obstacles[i]))
+			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(obstacles[i]):self.getAngleTo(obstacles[i]))) < getTargetAngle(mySelf,obstacles[i]))
 					&& dist > self.getDistanceTo(obstacles[i]))
 				return false;
 		}
 		for (i = 0; i < tanks.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(tanks[i])) < getTargetAngle(mySelf,tanks[i]))
+			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(tanks[i]):self.getAngleTo(tanks[i]))) < getTargetAngle(mySelf,tanks[i]))
 					&& dist > self.getDistanceTo(tanks[i])
 					&& self.getDistanceTo(tanks[i]) > 0)
 				return false;
