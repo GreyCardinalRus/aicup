@@ -532,6 +532,17 @@ double getTargetAngle(Tank from,Unit to)
 double getAngleToTarget(Tank from,Unit target)
 {
    double a = from.getTurretAngleTo(target);
+   if (target instanceof Tank) 
+   {
+   // проверим на движется ли он и куда направлен
+ 	  double needTiks = mySelf.getDistanceTo(target)/13;
+      if (100 < mySelf.getDistanceTo(target)
+				&& (Math.abs(target.getAngleTo(self) > 0.1 && (target
+						.getSpeedX() + .getSpeedY()) > 1)) {
+
+  		a=a; // поправка на ветер. Скорость снаряда 13 точек за тик
+		}  
+   }
    // поправка на скорость
    return a;
 	//return Math.atan((target.getWidth()+target.getWidth())/from.getDistanceTo(target)/2)/2;
