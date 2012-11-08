@@ -3,8 +3,8 @@ import model.*;
 //import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
-	static boolean IsDebug = true;
-	static boolean isChicken = false;
+	static boolean IsDebug = false;
+	static boolean isChicken = true;
 	int MoveStrategy = // 0; // Авто
 	1;// прячемся в углу - двигаемся задом!
 	int FindEnimyStrategy = 0; // Авто
@@ -111,21 +111,22 @@ public final class MyStrategy implements Strategy {
 		// Escape
 		if (isChicken)
 			for (i = 0; i < shells.length; i++) {
-				if ((Math.abs(shells[i].getAngleTo(self)) <getTargetAngle(mySelf,shells[i]))
-						&& 50 < self.getDistanceTo(shells[i])) {
-					if (Math.abs(self.getAngleTo(shells[i])) < 1) { // turn
-						if (self.getAngleTo(shells[i]) < 0) {
-							myMoveTank(self, world, move, 1, -1);
+				if ((Math.abs(shells[i].getAngleTo(mySelf)) < getTargetAngle(shells[i],mySelf)*2)
+						&& isVisible(mySelf, world, shells[i])
+						&& 50 < mySelf.getDistanceTo(shells[i])) {
+					if (Math.abs(mySelf.getAngleTo(shells[i])) < 1) { // turn
+						if (mySelf.getAngleTo(shells[i]) < 0||mySelf.getAngleTo(shells[i]) > 2.5) {
+							myMoveTank(mySelf, world, move, -1, 1);
 							if (IsDebug)
 								System.out.println(world.getTick()
 										+ " escape-rotate R "
-										+ (int) self.getDistanceTo(shells[i]));
+										+ (int) mySelf.getDistanceTo(shells[i])+" "+shells[i].getAngleTo(mySelf)+" "+mySelf.getAngleTo(shells[i]));
 						} else {
-							myMoveTank(self, world, move, -1, 1);
+							myMoveTank(mySelf, world, move, 1, -1);
 							if (IsDebug)
 								System.out.println(world.getTick()
 										+ " escape-rotate L "
-										+ (int) self.getDistanceTo(shells[i]));
+										+ (int) self.getDistanceTo(shells[i])+" "+shells[i].getAngleTo(mySelf)+" "+mySelf.getAngleTo(shells[i]));
 						}
 					} else {// move
 						if (move.getRightTrackPower() < 0
@@ -133,14 +134,14 @@ public final class MyStrategy implements Strategy {
 							myMoveTank(self, world, move, -1, -1);
 							if (IsDebug)
 								System.out.println(world.getTick()
-										+ " escape-rotate forward "
-										+ (int) self.getDistanceTo(shells[i]));
+										+ " escape-move forward "
+										+ (int) self.getDistanceTo(shells[i])+" "+shells[i].getAngleTo(mySelf)+" "+mySelf.getAngleTo(shells[i]));
 						} else {
 							myMoveTank(self, world, move, 1, 1);
 							if (IsDebug)
 								System.out.println(world.getTick()
-										+ " escape-rotate Reverse "
-										+ (int) self.getDistanceTo(shells[i]));
+										+ " escape-move Reverse "
+										+ (int) self.getDistanceTo(shells[i])+" "+shells[i].getAngleTo(mySelf)+" "+mySelf.getAngleTo(shells[i]));
 						}
 					}
 					return;
@@ -524,7 +525,7 @@ public final class MyStrategy implements Strategy {
 
 	}
 	
-double getTargetAngle(Tank from,Unit to)
+double getTargetAngle(Unit from,Unit to)
  {
 	return Math.atan((to.getWidth()+to.getWidth())/from.getDistanceTo(to)/4)/2;
  }
