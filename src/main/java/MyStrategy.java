@@ -172,16 +172,16 @@ public final class MyStrategy implements Strategy {
 					if (dist < 50) {
 
 					} else {
-						if (angle > -2.5)
-							myMoveTank(self, world, move, -1, 0);
-						else if (angle > -1.5)
-							myMoveTank(self, world, move, -1, 1);
-						else if (angle > 0.0)
-							myMoveTank(self, world, move, 1, -1);
-						else if (angle > 1.5)
-							myMoveTank(self, world, move, 0, -1);
-						else if (angle > 2.5)
+						if (angle < -2.5)
 							myMoveTank(self, world, move, -1, -1);
+						else if (angle < -1.5)
+							myMoveTank(self, world, move,  0, -1);
+						else if (angle < 0.0)
+							myMoveTank(self, world, move,  1, -1);
+						else if (angle < 1.5)
+							myMoveTank(self, world, move, -1,  1);
+						else if (angle < 2.5)
+							myMoveTank(self, world, move, -1,  0);
 						else
 							myMoveTank(self, world, move, -1, -1);
 					}
@@ -526,7 +526,7 @@ public final class MyStrategy implements Strategy {
 	
 double getTargetAngle(Tank from,Unit to)
  {
-	return Math.atan((to.getWidth()+to.getWidth())/from.getDistanceTo(to)/2)/2;
+	return Math.atan((to.getWidth()+to.getWidth())/from.getDistanceTo(to)/4)/2;
  }
 
 double getAngleToTarget(Tank from,Unit target)
@@ -537,8 +537,8 @@ double getAngleToTarget(Tank from,Unit target)
    // проверим на движется ли он и куда направлен
  	  double needTiks = mySelf.getDistanceTo(target)/13;
       if (100 < mySelf.getDistanceTo(target)
-				&& (Math.abs(target.getAngleTo(self) > 0.1 && (target
-						.getSpeedX() + .getSpeedY()) > 1)) {
+				&& (Math.abs(target.getAngleTo(mySelf)) > 0.1 && (target
+						.getSpeedX() + target.getSpeedY()) > 1)) {
 
   		a=a; // поправка на ветер. Скорость снаряда 13 точек за тик
 		}  
