@@ -3,7 +3,7 @@ import model.*;
 //import static java.lang.StrictMath.PI;
 
 public final class MyStrategy implements Strategy {
-	static boolean IsDebug = false;
+	static boolean IsDebug = true;
 	static boolean isChicken = true;
 	int MoveStrategy = // 0; // Авто
 	1;// прячемся в углу - двигаемся задом!
@@ -521,7 +521,7 @@ public final class MyStrategy implements Strategy {
 	
 double getTargetAngle(Unit from,Unit to)
  {
-	return Math.atan((to.getWidth()+to.getWidth())/from.getDistanceTo(to)/4)/2;
+	return Math.atan((to.getWidth()+to.getWidth()+20)/from.getDistanceTo(to)/4);
  }
 
 double getAngleToTarget(Tank from,Unit target)
