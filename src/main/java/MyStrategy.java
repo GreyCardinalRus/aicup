@@ -254,15 +254,6 @@ public final class MyStrategy implements Strategy {
 			  else if (angleToBonus <  2.9) myMoveTank( -1,  1);
 			  else myMoveTank( -1, -1);
 			}
-			 // else if (angleToBonus >  0.2) && angleToBonus > -1.5 || angleToBonus > 1.5
-			//		&& angleToBonus < 2.9) && (self.getDistanceTo(nearbonus) < (self
-			//		.getType() == TankType.TANK_DESTROYER ? 50 : 5000)))
-			//		|| (angleToBonus < -0.25 && (self.getDistanceTo(nearbonus) > (self
-			//				.getType() == TankType.TANK_DESTROYER ? 50 : 5000)))) {
-			//	myMoveTank(self, world, move, -1, 1);
-				// move.setLeftTrackPower(-1);
-				// move.setRightTrackPower(1 * self.getEngineRearPowerFactor());
-			
 		}
 	}
 
@@ -291,7 +282,7 @@ public final class MyStrategy implements Strategy {
 					continue;
 				if (null == EnemyTank)
 					EnemyTank = tanks[i];
-				if (self.getType() == TankType.TANK_DESTROYER
+				if ((self.getType() == TankType.TANK_DESTROYER||300>mySelf.getDistanceTo(tanks[i]))
 						&& Math.abs(self.getTurretAngleTo(tanks[i])) < Math
 								.abs(self.getTurretAngleTo(EnemyTank)))
 					EnemyTank = tanks[i];
@@ -307,10 +298,10 @@ public final class MyStrategy implements Strategy {
 						&& tanks[i].getCrewHealth() > 0 // live!!!
 						&& tanks[i].getHullDurability() > 0 // live!!!
 						// && isVisible(self, world, tanks[i])
-						&& Math.abs(self.getTurretAngleTo(tanks[i])) < 10 / self
-								.getDistanceTo(tanks[i])
+						&& Math.abs(getAngleToTarget(mySelf,tanks[i])) < getTargetAngle(mySelf,
+								tanks[i])
 						&& self.getDistanceTo(tanks[i]) > 0
-						&& self.getDistanceTo(tanks[i]) < 300
+						&& self.getDistanceTo(tanks[i]) < 1000
 						&& myFire(self, move, tanks[i])) {
 					EnemyTank = tanks[i];
 					// break;
@@ -456,17 +447,17 @@ public final class MyStrategy implements Strategy {
 		double dist = self.getDistanceTo(targetUnit);
 
 		for (i = 0; i < bonuses.length; i++) {
-			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(bonuses[i]):self.getAngleTo(bonuses[i]))) < getTargetAngle(mySelf,bonuses[i]))
+			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(bonuses[i]):self.getAngleTo(bonuses[i]))) < 2*getTargetAngle(mySelf,bonuses[i]))
 					&& dist > self.getDistanceTo(bonuses[i]))
 				return false;
 		}
 		for (i = 0; i < obstacles.length; i++) {
-			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(obstacles[i]):self.getAngleTo(obstacles[i]))) < getTargetAngle(mySelf,obstacles[i]))
+			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(obstacles[i]):self.getAngleTo(obstacles[i]))) < 2*getTargetAngle(mySelf,obstacles[i]))
 					&& dist > self.getDistanceTo(obstacles[i]))
 				return false;
 		}
 		for (i = 0; i < tanks.length; i++) {
-			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(tanks[i]):self.getAngleTo(tanks[i]))) < getTargetAngle(mySelf,tanks[i]))
+			if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(tanks[i]):self.getAngleTo(tanks[i]))) < 2*getTargetAngle(mySelf,tanks[i]))
 					&& dist > self.getDistanceTo(tanks[i])
 					&& self.getDistanceTo(tanks[i]) > 0)
 				return false;
@@ -492,8 +483,10 @@ public final class MyStrategy implements Strategy {
 			return false;
 
 		for (i = 0; i < bonuses.length; i++) {
-			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < getTargetAngle(mySelf,bonuses[i]))
-					&& dist > self.getDistanceTo(bonuses[i]))
+//			if ((Math.abs(minAngle - self.getTurretAngleTo(bonuses[i])) < getTargetAngle(mySelf,bonuses[i]))
+//					&& dist > self.getDistanceTo(bonuses[i]))
+				if ((Math.abs(minAngle - (self instanceof Tank?((Tank)self).getTurretAngleTo(bonuses[i]):self.getAngleTo(bonuses[i]))) < 2*getTargetAngle(mySelf,bonuses[i]))
+						&& dist > self.getDistanceTo(bonuses[i]))				
 				return false;
 		}
 		for (i = 0; i < obstacles.length; i++) {
@@ -513,11 +506,12 @@ public final class MyStrategy implements Strategy {
 				return false;
 		}
 		if (100 < dist
-				&& (Math.abs(targetTank.getAngleTo(self) - minAngle) > getTargetAngle(mySelf,targetTank) && (targetTank
+				&& (Math.abs(targetTank.getAngleTo(mySelf)) > 1//getTargetAngle(mySelf,targetTank) 
+						&& (targetTank
 						.getSpeedX() + targetTank.getSpeedY()) > 1)) {
 			return false;
 		}
-		if (100 < dist)
+		if (300 < dist)
 			move.setFireType(FireType.REGULAR);
 		else
 			move.setFireType(FireType.PREMIUM_PREFERRED);
